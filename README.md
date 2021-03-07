@@ -21,3 +21,11 @@ IOT system to monitor Aqua Farming
 <p align="center">
     <img width="720" height="480" src="Assets/output.jpg">
 </p>
+
+
+### Blynk:
+
+<p align="center">
+    <img width="631" height="1280" src="Assets/blynk.jpeg">
+</p>
+
