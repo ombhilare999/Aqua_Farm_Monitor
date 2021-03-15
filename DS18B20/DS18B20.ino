@@ -16,7 +16,7 @@
 
 float sensorData;
 
-char auth[] = "T_NiFIv-ulqUcA4vrA54FE2BcOni1Isa";
+char auth[] = "-----------------------";
 
 OneWire oneWire(ONE_WIRE_BUS);          // Setup a oneWire instance to communicate with any OneWire device
 DallasTemperature sensor(&oneWire);    // Pass oneWire reference to DallasTemperature library
