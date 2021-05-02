@@ -1,7 +1,12 @@
-/*********
-  Modified from the examples of the Arduino LoRa library
-  More resources: https://randomnerdtutorials.com
-*********/
+/////////////////////////////////////////////////////
+//  Aqua Farm Monitoring System
+//  Group 2:
+//      - Omkar Bhilare
+//      - Omkar Sargar
+//      - Lukesh Ankawar
+//      - Om Fuke 
+////////////////////////////////////////////////////
+
 
 #include <SPI.h>
 #include <LoRa.h>
@@ -56,9 +61,5 @@ void loop() {
       String LoRaData = LoRa.readString();
       Serial.print(LoRaData); 
     }
-
-    // print RSSI of packet
-    Serial.print("' with RSSI ");
-    Serial.println(LoRa.packetRssi());
   }
 }
