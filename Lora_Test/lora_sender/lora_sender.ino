@@ -68,15 +68,15 @@ void getReadings(){
   turbidity = map(val, 0, 2200, 100, 1);
 
   if (turbidity < 5) {
-    Serial.println("Clear  ");
+    Serial.print("Clear Water  ");
     water = "Clear";
   }
-  else if((turbidity > 7) && (turbidity < 20)) {
-    Serial.println("Cloudy  ");
+  else if((turbidity > 7) && (turbidity < 30)) {
+    Serial.print("Cloudy  Water  ");
     water = "Cloudy";
   }
-  else if (turbidity > 20) {
-    Serial.print("Dirty ");
+  else if (turbidity > 30) {
+    Serial.print("Dirty Water  ");
     water = "Dirty";
   }
   
@@ -114,5 +114,5 @@ void setup() {
 void loop() {
   getReadings();
   sendReadings();
-  delay(10000);
+  delay(1000);
 }
