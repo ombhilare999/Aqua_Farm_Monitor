@@ -22,7 +22,10 @@
 #define DIO0 2
 #define BAND 866E6
 
+//packet counter
+int readingID = 0;
 String LoRaMessage = "";
+String water = "";
 
 #define DHTTYPE DHT11
 uint8_t DHTPin = 26;                   // DHT Sensor             
@@ -32,11 +35,10 @@ const int oneWireBus = 25;             // GPIO where the DS18B20 is connected to
 OneWire oneWire(oneWireBus);          // Setup a oneWire instance to communicate with any OneWire devices
 DallasTemperature sensors(&oneWire);  // Pass our oneWire reference to Dallas Temperature sensor 
 
-float temperatureC;
+float temperatureS;
 float Temperature,Humidity;
 
-unsigned long interval=10000; // the time we need to wait
-unsigned long previousMillis=0; // millis() returns an unsigned long.
+double turbidity;                     //Sensor data
 
 //Initialize LoRa module
 void startLoRA(){
@@ -56,6 +58,48 @@ void startLoRA(){
   Serial.println("LoRa Initializing OK!");
 }
 
+void getReadings(){
+  Humidity = dht.readHumidity();
+  Temperature = dht.readTemperature();
+  sensors.requestTemperatures(); 
+  temperatureS = sensors.getTempCByIndex(0);
+  
+  int val = analogRead(34);
+  turbidity = map(val, 0, 2200, 100, 1);
+
+  if (turbidity < 5) {
+    Serial.println("Clear  ");
+    water = "Clear";
+  }
+  else if((turbidity > 7) && (turbidity < 20)) {
+    Serial.println("Cloudy  ");
+    water = "Cloudy";
+  }
+  else if (turbidity > 20) {
+    Serial.print("Dirty ");
+    water = "Dirty";
+  }
+  
+  Serial.print("Temperature :  ");
+  Serial.print(Temperature);
+  Serial.print("  ::  Humidity :  ");
+  Serial.print(Humidity);
+  Serial.print("  ::  Submereged Temperature :  ");
+  Serial.println(temperatureS);
+}
+
+void sendReadings() {
+  LoRaMessage = "T " + String(Temperature) + "  H " + String(Humidity) + "  ST " + String(temperatureS) + "  W  "+ water;
+  //Send LoRa packet to receiver
+  LoRa.beginPacket();
+  LoRa.print(LoRaMessage);
+  LoRa.endPacket();
+  
+  Serial.print("Sending packet: ");
+  Serial.println(readingID);
+  readingID++;
+}
+
 void setup() {
   //initialize Serial Monitor
   Serial.begin(115200);
@@ -68,30 +112,7 @@ void setup() {
 
 
 void loop() {
-  unsigned long currentMillis = millis(); // grab current time
-
-   // check if "interval" time has passed (1000 milliseconds)
-  if((unsigned long)(currentMillis - previousMillis) >= interval) {
-      
-    Serial.print("Sending packet: ");
-
-    sensors.requestTemperatures(); 
-    temperatureC = sensors.getTempCByIndex(0);
-
-    Humidity = dht.readHumidity();
-    Temperature = dht.readTemperature();
-
-    //Send LoRa packet to receiver
-    LoRa.beginPacket();
-    LoRa.print("DHT Humidity: ");
-    LoRa.print(Humidity);
-    LoRa.print("::  Ambient Temperature: ");
-    LoRa.print(Temperature);
-    LoRa.print("::  Water Temperature: ");
-    LoRa.print(temperatureC);
-    LoRa.endPacket();
-      
-    // save the "current" time
-    previousMillis = millis();
-  }
+  getReadings();
+  sendReadings();
+  delay(10000);
 }

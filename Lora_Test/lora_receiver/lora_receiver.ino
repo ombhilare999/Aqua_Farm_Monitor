@@ -7,9 +7,20 @@
 //      - Om Fuke 
 ////////////////////////////////////////////////////
 
-
+#define BLYNK_PRINT Serial
 #include <SPI.h>
 #include <LoRa.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+
+
+char auth[] = "T_NiFIv-ulqUcA4vrA54FE2BcOni1Isa";
+char ssid[] = "iBall-Baton";
+char pass[] = "1234567847";
+
+// Attach virtual serial terminal to Virtual Pin V9
+WidgetTerminal terminal(V9);
 
 //define the pins used by the LoRa transceiver module
 #define SCK 5
@@ -43,23 +54,58 @@ void startLoRA(){
   Serial.println("LoRa Initializing OK!");
 }
 
-void setup() {
-  //initialize Serial Monitor
-  Serial.begin(115200);
-  startLoRA();
-}
+BlynkTimer timer;
 
-void loop() {
-  // try to parse packet
+void myTimerEvent()
+{
   int packetSize = LoRa.parsePacket();
   if (packetSize) {
     // received a packet
     Serial.print("Received packet '");
 
     // read packet
-    while (LoRa.available()) {
+    if (LoRa.available()) {
       String LoRaData = LoRa.readString();
-      Serial.print(LoRaData); 
+      Serial.println(LoRaData); 
+      terminal.println(LoRaData);      
+      // Ensure everything is sent
+      terminal.flush();
+    }
+  }
+}  
+void setup() {
+  //initialize Serial Monitor
+  Serial.begin(115200);
+  startLoRA();
+
+  Blynk.begin(auth, ssid, pass);
+
+  // Clear the terminal content
+  terminal.clear();
+
+  // This will print Blynk Software version to the Terminal Widget when
+  // your hardware gets connected to Blynk Server
+  terminal.println(F("Blynk v" BLYNK_VERSION ": Device started"));
+  terminal.println(F("-------------"));
+  terminal.flush();
+  timer.setInterval(1000L, myTimerEvent);
+}
+
+void loop() {
+  // try to parse packet
+  Blynk.run();
+  int packetSize = LoRa.parsePacket();
+  if (packetSize) {
+    // received a packet
+    Serial.print("Received packet '");
+
+    // read packet
+    if (LoRa.available()) {
+      String LoRaData = LoRa.readString();
+      Serial.println(LoRaData); 
+      terminal.println(LoRaData);      
+      // Ensure everything is sent
+      terminal.flush();
     }
   }
 }
